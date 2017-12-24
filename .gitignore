@@ -1,0 +1,8 @@
+.git/
+cache/
+data/
+submissions/
+*/__pycache__
+*/.ipynb_checkpoints
+notebooks/.ipynb_checkpoints
+scripts/.ipynb_checkpoints

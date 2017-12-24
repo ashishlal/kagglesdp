@@ -1,0 +1,50 @@
+diff --git a/ffm-train.cpp b/ffm-train.cpp
+index 55fdc11..1f5585a 100644
+--- a/ffm-train.cpp
++++ b/ffm-train.cpp
+@@ -26,6 +26,7 @@ string train_help() {
+ "-t <iteration>: set number of iterations (default 15)\n"
+ "-r <eta>: set learning rate (default 0.2)\n"
+ "-s <nr_threads>: set number of threads (default 1)\n"
++"-S <Seed>: RNG seed (default 2017)\n"
+ "-p <path>: set path to the validation set\n"
+ "--quiet: quiet model (no output)\n"
+ "--no-norm: disable instance-wise normalization\n"
+@@ -91,6 +92,13 @@ Option parse_option(int argc, char **argv) {
+             opt.param.lambda = atof(args[i].c_str());
+             if(opt.param.lambda < 0)
+                 throw invalid_argument("regularization cost should not be smaller than zero");
++        } else if(args[i].compare("-S") == 0) {
++            if(i == argc-1)
++                throw invalid_argument("need to specify seed after -S");
++            i++;
++            opt.param.seed = atoi(args[i].c_str());
++            if(opt.param.seed < 0)
++                throw invalid_argument("number of threads should be non-negative");
+         } else if(args[i].compare("-s") == 0) {
+             if(i == argc-1)
+                 throw invalid_argument("need to specify number of threads after -s");
+diff --git a/ffm.cpp b/ffm.cpp
+index d11e817..3ef61c6 100644
+--- a/ffm.cpp
++++ b/ffm.cpp
+@@ -278,6 +278,7 @@ ffm_model init_model(ffm_int n, ffm_int m, ffm_parameter param)
+     ffm_float *w = model.W;
+ 
+     default_random_engine generator;
++    generator.seed(param.seed);
+     uniform_real_distribution<ffm_float> distribution(0.0, 1.0);
+ 
+     for(ffm_int j = 0; j < model.n; j++) {
+diff --git a/ffm.h b/ffm.h
+index fb7b8d7..cb1f64f 100644
+--- a/ffm.h
++++ b/ffm.h
+@@ -32,6 +32,7 @@ struct ffm_parameter {
+     ffm_float lambda = 0.00002; // regularization parameter
+     ffm_int nr_iters = 15;
+     ffm_int k = 4; // number of latent factors
++    ffm_int seed = 2017; // RNG seed
+     bool normalization = true;
+     bool auto_stop = false;
+ };
